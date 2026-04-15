@@ -1,55 +1,406 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-    <title>Anime Quote Generator</title>
-    
+    <title>AniMood — Your Vibe</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        min-height: 100vh;
+        background: #0a0a0f;
+        font-family: Georgia, serif;
+        color: #e8dcc8;
+      }
+      .bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            ellipse 70% 50% at 10% 90%,
+            rgba(192, 57, 43, 0.1) 0%,
+            transparent 55%
+          ),
+          radial-gradient(
+            ellipse 50% 70% at 90% 10%,
+            rgba(201, 168, 76, 0.08) 0%,
+            transparent 50%
+          );
+      }
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 2rem;
+        background: rgba(10, 10, 15, 0.9);
+        border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+        backdrop-filter: blur(10px);
+      }
+      .logo {
+        font-size: 1.4rem;
+        font-weight: bold;
+        letter-spacing: 0.05em;
+      }
+      .logo span {
+        color: #c9a84c;
+      }
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+      .nav-user {
+        font-style: italic;
+        color: #7a6f5e;
+        font-size: 0.95rem;
+      }
+      .nav-user strong {
+        color: #c9a84c;
+        font-style: normal;
+      }
+      .logout {
+        padding: 0.4rem 1rem;
+        border: 1px solid rgba(201, 168, 76, 0.35);
+        color: #c9a84c;
+        background: transparent;
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          background 0.2s,
+          color 0.2s;
+      }
+      .logout:hover {
+        background: rgba(201, 168, 76, 0.12);
+      }
+
+      main {
+        position: relative;
+        z-index: 1;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 4rem 1.5rem 6rem;
+      }
+      .page-title {
+        text-align: center;
+        margin-bottom: 0.6rem;
+        font-size: 2rem;
+        letter-spacing: 0.06em;
+      }
+      .page-title span {
+        color: #c9a84c;
+      }
+      .page-sub {
+        text-align: center;
+        font-style: italic;
+        color: #7a6f5e;
+        margin-bottom: 3rem;
+      }
+
+      /* ── Mood selector ── */
+      .mood-panel {
+        background: rgba(16, 16, 26, 0.9);
+        border: 1px solid rgba(201, 168, 76, 0.2);
+        padding: 2rem;
+        margin-bottom: 3rem;
+      }
+      .mood-label {
+        text-align: center;
+        font-size: 0.65rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: #c9a84c;
+        margin-bottom: 1.2rem;
+      }
+      .mood-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+      }
+      .mood-btn {
+        padding: 1.2rem 0.5rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #e8dcc8;
+        cursor: pointer;
+        text-align: center;
+        transition: all 0.2s;
+        font-family: Georgia, serif;
+      }
+      .mood-btn:hover {
+        border-color: rgba(201, 168, 76, 0.4);
+        background: rgba(201, 168, 76, 0.06);
+      }
+      .mood-btn.selected {
+        border-color: var(--mood-color, #c9a84c);
+        background: rgba(var(--mood-rgb, 201, 168, 76), 0.1);
+      }
+      .mood-btn .emoji {
+        font-size: 1.8rem;
+        display: block;
+        margin-bottom: 0.4rem;
+      }
+      .mood-btn .label {
+        font-size: 0.75rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+      }
+      .mood-btn[data-mood="positive"] {
+        --mood-color: #27ae60;
+        --mood-rgb: 39, 174, 96;
+      }
+      .mood-btn[data-mood="neutral"] {
+        --mood-color: #2980b9;
+        --mood-rgb: 41, 128, 185;
+      }
+      .mood-btn[data-mood="negative"] {
+        --mood-color: #c0392b;
+        --mood-rgb: 192, 57, 43;
+      }
+      .mood-btn[data-mood="positive"].selected {
+        border-color: #27ae60;
+        background: rgba(39, 174, 96, 0.1);
+      }
+      .mood-btn[data-mood="neutral"].selected {
+        border-color: #2980b9;
+        background: rgba(41, 128, 185, 0.1);
+      }
+      .mood-btn[data-mood="negative"].selected {
+        border-color: #c0392b;
+        background: rgba(192, 57, 43, 0.1);
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 0.85rem;
+        background: linear-gradient(135deg, #8b6914, #c9a84c, #8b6914);
+        background-size: 200% auto;
+        border: none;
+        color: #0a0a0f;
+        font-size: 0.82rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        font-weight: bold;
+        cursor: pointer;
+        transition:
+          background-position 0.4s,
+          box-shadow 0.3s;
+      }
+      .submit-btn:hover {
+        background-position: right center;
+        box-shadow: 0 0 25px rgba(201, 168, 76, 0.35);
+      }
+
+      /* ── Quotes ── */
+      .quotes-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+      .quotes-header::before,
+      .quotes-header::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(201, 168, 76, 0.3),
+          transparent
+        );
+      }
+      .quotes-header span {
+        font-size: 0.65rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        color: #c9a84c;
+        white-space: nowrap;
+      }
+      .mood-tag {
+        display: inline-block;
+        padding: 0.25rem 0.8rem;
+        font-size: 0.65rem;
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        border: 1px solid;
+        margin-bottom: 1.5rem;
+      }
+      .mood-tag.positive {
+        border-color: #27ae60;
+        color: #27ae60;
+      }
+      .mood-tag.neutral {
+        border-color: #2980b9;
+        color: #2980b9;
+      }
+      .mood-tag.negative {
+        border-color: #c0392b;
+        color: #c0392b;
+      }
+
+      .quote-card {
+        background: rgba(16, 16, 26, 0.9);
+        border: 1px solid rgba(201, 168, 76, 0.15);
+        border-left: 3px solid rgba(201, 168, 76, 0.5);
+        padding: 1.8rem 2rem;
+        margin-bottom: 1.2rem;
+        position: relative;
+        animation: fadeUp 0.5s ease both;
+      }
+      .quote-card:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .quote-card:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .quote-mark {
+        position: absolute;
+        top: 1rem;
+        right: 1.2rem;
+        font-size: 3rem;
+        color: rgba(201, 168, 76, 0.08);
+        font-family: Georgia, serif;
+        line-height: 1;
+        user-select: none;
+      }
+      .quote-text {
+        font-size: 1.15rem;
+        line-height: 1.7;
+        font-style: italic;
+        margin-bottom: 1rem;
+        color: #e8dcc8;
+      }
+      .quote-meta {
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        color: #7a6f5e;
+      }
+      .quote-meta strong {
+        color: #c9a84c;
+      }
+
+      .no-quotes {
+        text-align: center;
+        padding: 3rem;
+        color: #5a5040;
+        font-style: italic;
+      }
+
+      /* hidden input */
+      #mood-input {
+        display: none;
+      }
+    </style>
   </head>
   <body>
-    <h1>Anime Quote Generator</h1>
+    <div class="bg"></div>
 
-    <form id="quoteForm" method="POST">
-      <label for="mood">Select your mood:</label>
-      <select id="mood" name="mood">
-        <option value="positive" {% if mood == 'positive' %}selected{% endif %}>Positive</option>
-        <option value="negative" {% if mood == 'negative' %}selected{% endif %}>Negative</option>
-        <option value="neutral" {% if mood == 'neutral' %}selected{% endif %}>Neutral</option>
-      </select>
-      <br>
-      <br>
-      <br>
-      <button type="submit">Get Quote</button>
-    </form>
+    <nav>
+      <div class="logo">Ani<span>Mood</span></div>
+      <div class="nav-right">
+        <span class="nav-user">Welcome, <strong>{{ user }}</strong></span>
+        <a class="logout" href="/logout">Logout</a>
+      </div>
+    </nav>
 
-    {% if mood %}
-    <h2>Quote for {{ mood }} mood</h2>
-    {% for quote in quotes %}
-        <div class="quoteDisplay">
-            <p>{{ quote['Quote'] }}</p>
-            <p><strong>Character:</strong> {{ quote['Character'] }}</p>
-            <p><strong>Anime:</strong> {{ quote['Anime'] }}</p>
+    <main>
+      <h1 class="page-title">Find Your <span>Quote</span></h1>
+      <p class="page-sub">How are you feeling right now?</p>
+
+      <!-- Mood form -->
+      <form method="POST" action="/home" id="moodForm">
+        <div class="mood-panel">
+          <div class="mood-label">Choose your current mood</div>
+          <div class="mood-grid">
+            <button
+              type="button"
+              class="mood-btn {% if mood == 'positive' %}selected{% endif %}"
+              data-mood="positive"
+              onclick="selectMood('positive')"
+            >
+              <span class="emoji">✨</span>
+              <span class="label">Positive</span>
+            </button>
+            <button
+              type="button"
+              class="mood-btn {% if mood == 'neutral' %}selected{% endif %}"
+              data-mood="neutral"
+              onclick="selectMood('neutral')"
+            >
+              <span class="emoji">⚖️</span>
+              <span class="label">Neutral</span>
+            </button>
+            <button
+              type="button"
+              class="mood-btn {% if mood == 'negative' %}selected{% endif %}"
+              data-mood="negative"
+              onclick="selectMood('negative')"
+            >
+              <span class="emoji">🌧️</span>
+              <span class="label">Negative</span>
+            </button>
+          </div>
+          <input
+            type="hidden"
+            name="mood"
+            id="mood-input"
+            value="{{ mood or '' }}"
+          />
+          <button type="submit" class="submit-btn">Summon Quotes</button>
         </div>
-    {% endfor %}
-{% endif %}
+      </form>
 
+      <!-- Results -->
+      {% if quotes %}
+      <div class="quotes-header"><span>◆ Your Quotes ◆</span></div>
+      <div class="mood-tag {{ mood }}">{{ mood }} energy</div>
+
+      {% for q in quotes %}
+      <div class="quote-card">
+        <div class="quote-mark">"</div>
+        <p class="quote-text">"{{ q.Quote }}"</p>
+        <div class="quote-meta">
+          {% if q.Character is defined %}— <strong>{{ q.Character }}</strong>{%
+          endif %} {% if q.Anime is defined %}&nbsp;·&nbsp; {{ q.Anime }}{%
+          endif %}
+        </div>
+      </div>
+      {% endfor %} {% elif mood %}
+      <div class="no-quotes">No quotes found for this mood. Try another.</div>
+      {% endif %}
+    </main>
 
     <script>
-      // Save selected mood to localStorage after form submission
-      const form = document.getElementById("quoteForm");
-      const moodSelect = document.getElementById("mood");
-
-      // Store the selected mood in localStorage after user selects a mood
-      form.addEventListener("submit", function (event) {
-        const selectedMood = moodSelect.value;
-        localStorage.setItem("selectedMood", selectedMood); // Save the selected mood
-      });
-
-      // Restore the previously selected mood if available in localStorage
-      const savedMood = localStorage.getItem("selectedMood");
-      if (savedMood) {
-        moodSelect.value = savedMood; // Set the dropdown to the saved mood
+      function selectMood(mood) {
+        document
+          .querySelectorAll(".mood-btn")
+          .forEach((b) => b.classList.remove("selected"));
+        document
+          .querySelector(`[data-mood="${mood}"]`)
+          .classList.add("selected");
+        document.getElementById("mood-input").value = mood;
       }
     </script>
   </body>
