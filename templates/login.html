@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AniMood — Login</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0a0a0f;
+        font-family: Georgia, serif;
+        color: #e8dcc8;
+        overflow: hidden;
+      }
+      .bg {
+        position: fixed;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse 80% 60% at 20% 80%,
+            rgba(192, 57, 43, 0.15) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse 60% 80% at 80% 20%,
+            rgba(201, 168, 76, 0.1) 0%,
+            transparent 55%
+          );
+        pointer-events: none;
+      }
+      .kanji-bg {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .kanji-bg span {
+        position: absolute;
+        font-size: 6rem;
+        color: rgba(201, 168, 76, 0.04);
+        font-family: serif;
+        animation: floatUp linear infinite;
+        user-select: none;
+      }
+      @keyframes floatUp {
+        from {
+          transform: translateY(110vh) rotate(-10deg);
+          opacity: 0;
+        }
+        10%,
+        90% {
+          opacity: 1;
+        }
+        to {
+          transform: translateY(-20vh) rotate(10deg);
+          opacity: 0;
+        }
+      }
+      .card {
+        position: relative;
+        z-index: 10;
+        width: min(420px, 92vw);
+        background: rgba(16, 16, 26, 0.97);
+        border: 1px solid rgba(201, 168, 76, 0.25);
+        padding: 3rem 2.5rem 2.5rem;
+        animation: reveal 0.7s ease both;
+      }
+      @keyframes reveal {
+        from {
+          opacity: 0;
+          transform: translateY(24px);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .card::before,
+      .card::after {
+        content: "";
+        position: absolute;
+        width: 18px;
+        height: 18px;
+        border-color: #c9a84c;
+        border-style: solid;
+      }
+      .card::before {
+        top: -1px;
+        left: -1px;
+        border-width: 2px 0 0 2px;
+      }
+      .card::after {
+        bottom: -1px;
+        right: -1px;
+        border-width: 0 2px 2px 0;
+      }
+      h1 {
+        font-size: 2.2rem;
+        font-weight: bold;
+        color: #e8dcc8;
+        text-align: center;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.4rem;
+      }
+      h1 span {
+        color: #c9a84c;
+      }
+      .sub {
+        text-align: center;
+        font-style: italic;
+        color: #7a6f5e;
+        margin-bottom: 2rem;
+      }
+      .divider {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 1.8rem;
+      }
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(
+          to right,
+          transparent,
+          rgba(201, 168, 76, 0.4),
+          transparent
+        );
+      }
+      .divider span {
+        color: #c9a84c;
+        font-size: 0.7rem;
+        letter-spacing: 0.3em;
+      }
+      .error {
+        background: rgba(192, 57, 43, 0.15);
+        border: 1px solid rgba(192, 57, 43, 0.5);
+        border-left: 3px solid #c0392b;
+        color: #e88;
+        padding: 0.7rem 1rem;
+        margin-bottom: 1rem;
+        font-style: italic;
+        animation: shake 0.4s ease;
+      }
+      @keyframes shake {
+        25% {
+          transform: translateX(-6px);
+        }
+        75% {
+          transform: translateX(6px);
+        }
+      }
+      label {
+        display: block;
+        font-size: 0.65rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: #c9a84c;
+        margin-bottom: 0.4rem;
+      }
+      input {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(201, 168, 76, 0.2);
+        color: #e8dcc8;
+        font-family: Georgia, serif;
+        font-size: 1rem;
+        margin-bottom: 1.2rem;
+        outline: none;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+      }
+      input::placeholder {
+        color: #5a5040;
+        font-style: italic;
+      }
+      input:focus {
+        border-color: #c9a84c;
+        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+      }
+      button {
+        width: 100%;
+        padding: 0.85rem;
+        background: linear-gradient(135deg, #8b6914, #c9a84c, #8b6914);
+        background-size: 200% auto;
+        border: none;
+        color: #0a0a0f;
+        font-size: 0.82rem;
+        letter-spacing: 0.25em;
+        text-transform: uppercase;
+        font-weight: bold;
+        cursor: pointer;
+        transition:
+          background-position 0.4s,
+          box-shadow 0.3s;
+      }
+      button:hover {
+        background-position: right center;
+        box-shadow: 0 0 25px rgba(201, 168, 76, 0.35);
+      }
+      .hint {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.82rem;
+        color: #5a5040;
+        font-style: italic;
+      }
+      .hint strong {
+        color: rgba(201, 168, 76, 0.6);
+        font-style: normal;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg"></div>
+    <div class="kanji-bg" id="kanji"></div>
+
+    <div class="card">
+      <h1>Ani<span>Mood</span></h1>
+      <p class="sub">Wisdom from a thousand worlds</p>
+      <div class="divider"><span>◆◇◆</span></div>
+
+      {% if error %}
+      <div class="error">⚔ {{ error }}</div>
+      {% endif %}
+
+      <form method="POST" action="/">
+        <label for="username">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Enter your name…"
+          required
+        />
+
+        <label for="password">Password</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Your secret…"
+          required
+        />
+
+        <button type="submit">Enter the Password</button>
+      </form>
+      <p class="hint">
+        Try: <strong>demo / demopw</strong> &nbsp;·&nbsp;
+        <strong>admin / secret</strong>
+      </p>
+    </div>
+
+    <script>
+      const KANJI = [
+        "魂",
+        "力",
+        "愛",
+        "剣",
+        "夢",
+        "道",
+        "炎",
+        "星",
+        "龍",
+        "風",
+        "雷",
+        "空",
+        "心",
+        "命",
+      ];
+      const container = document.getElementById("kanji");
+      function spawn() {
+        const el = document.createElement("span");
+        el.textContent = KANJI[Math.floor(Math.random() * KANJI.length)];
+        el.style.left = Math.random() * 100 + "vw";
+        const d = 16 + Math.random() * 16;
+        el.style.animationDuration = d + "s";
+        el.style.animationDelay = -(Math.random() * d) + "s";
+        el.style.fontSize = 3 + Math.random() * 7 + "rem";
+        container.appendChild(el);
+        setTimeout(() => el.remove(), d * 1000);
+      }
+      for (let i = 0; i < 16; i++) spawn();
+      setInterval(spawn, 2500);
+    </script>
+  </body>
+</html>
