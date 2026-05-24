@@ -44,8 +44,8 @@ Password: password
 or
   
 Username: demo
-Password: demo
-**How It Works**  
+Password: demo  
+**How It Works**    
 The app loads anime quotes from AnimeQuotes.json
 Quotes are preprocessed and analyzed using VADER sentiment analysis
 Quotes are classified into:
